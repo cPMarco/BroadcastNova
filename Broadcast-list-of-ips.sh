@@ -61,12 +61,14 @@ if [ -z "${FILE}" ]; then
     usage
 fi
 
-if [[ "$TYPE" -eq "all_vms" ]]; then
+# if [[ "$TYPE" -eq "all_vms" ]]; then
+if [ "$TYPE" == "all_vms" ]; then
     \egrep -iv "store|manage|verify|tickets" ~/t1 | \awk '{print $10}' > ~/tmp-ips.txt
-elif [[ "$TYPE" -eq "sandbox_vms" ]]; then
+elif [ "$TYPE" == "sandbox_vms" ]; then
+    echo "(debug) in sbvms, TYPE: [$TYPE]"
     \egrep -i "sand|sb-" ~/t1 | \awk '{print $10}' > ~/tmp-ips.txt
-elif [[ "$TYPE" -eq "binary_vms" ]]; then
-    \egrep -iv "sand|sb-|store|manage|verify|tickets" ~/t1 | \awk '{print $10}' > ~/tmp-ips.txt
+elif [ "$TYPE" == "binary_vms" ]; then
+    \egrep -iv "sand|sb-|_sb_|store|manage|verify|tickets" ~/t1 | \awk '{print $10}' > ~/tmp-ips.txt
 fi
 
 if [ -z "$TYPE" ]; then
