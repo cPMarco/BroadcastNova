@@ -61,14 +61,20 @@ if [ -z "${FILE}" ]; then
     usage
 fi
 
-# if [[ "$TYPE" -eq "all_vms" ]]; then
+length_input_file=$( wc -l $FILE | awk '{print $1}' )
+# XXX proly 40.
+if [ $length_input_file -gt 30 ]; then
+    echo -e "\n[error] Input file too long - it should be a short list of servers\n"
+    usage
+fi
+
 if [ "$TYPE" == "all_vms" ]; then
-    \egrep -iv "store|manage|verify|tickets" ~/t1 | \awk '{print $10}' > ~/tmp-ips.txt
+    \egrep -iv "store|manage|verify|tickets" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
 elif [ "$TYPE" == "sandbox_vms" ]; then
     echo "(debug) in sbvms, TYPE: [$TYPE]"
-    \egrep -i "sand|sb-" ~/t1 | \awk '{print $10}' > ~/tmp-ips.txt
+    \egrep -i "sand|sb-" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
 elif [ "$TYPE" == "binary_vms" ]; then
-    \egrep -iv "sand|sb-|_sb_|store|manage|verify|tickets" ~/t1 | \awk '{print $10}' > ~/tmp-ips.txt
+    \egrep -iv "sand|sb-|_sb_|store|manage|verify|tickets" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
 fi
 
 if [ -z "$TYPE" ]; then
