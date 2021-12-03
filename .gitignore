@@ -1,0 +1,12 @@
+# ignore vim swap files
+*.swp
+*.swo
+# ignore tidy files
+*.bak
+*.ERR
+# Ignore tags files
+tags
+TAGS
+# Ignore patch files
+*.rej
+*.orig
