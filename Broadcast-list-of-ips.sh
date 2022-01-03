@@ -8,6 +8,7 @@
 # If I'm gona redo all that prunning again, here's the start
 # nova list --fields 'name','created','status','networks','metadata'
 FILE="$HOME/t1"
+echo "Using input file: $FILE"
 USERNAME='root'
 
 usage() {
@@ -62,16 +63,15 @@ if [ -z "${FILE}" ]; then
 fi
 
 length_input_file=$( wc -l $FILE | awk '{print $1}' )
-# XXX proly 40.
-if [ $length_input_file -gt 30 ]; then
-    echo -e "\n[error] Input file too long - it should be a short list of servers\n"
+lines_with_ips=$( cat $FILE | \grep -E '([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3}' | wc -l )
+if [ $length_input_file -ne $lines_with_ips ]; then
+    echo -e "\n[error] Input file needs to be a list full of only servers with IP addresses. Each line is checked.\n"
     usage
 fi
 
 if [ "$TYPE" == "all_vms" ]; then
     \egrep -iv "store|manage|verify|tickets" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
 elif [ "$TYPE" == "sandbox_vms" ]; then
-    echo "(debug) in sbvms, TYPE: [$TYPE]"
     \egrep -i "sand|sb-" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
 elif [ "$TYPE" == "binary_vms" ]; then
     \egrep -iv "sand|sb-|_sb_|store|manage|verify|tickets" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
@@ -80,12 +80,10 @@ fi
 if [ -z "$TYPE" ]; then
     usage
 fi
-echo "(debug) TYPE: [$TYPE]"
-echo "(debug) opt: [$opt]"
 
 # Get IP's from a file
 declare -a HOSTS=( $( cat ~/tmp-ips.txt ) );
-echo "hosts found: ${HOSTS[@]}"
+echo "Host IP's found: ${HOSTS[@]}"
 
 
 COUNT=${#HOSTS[@]}
