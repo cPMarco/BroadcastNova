@@ -12,7 +12,7 @@ echo "Using input file: $FILE"
 USERNAME='root'
 
 usage() {
-	echo "Usage: provide an option" 1>&2;
+	echo "Usage: provide one of the following options" 1>&2;
     echo " h )"
     echo "   usage"
     echo "   ;;"
@@ -22,10 +22,6 @@ usage() {
     echo " b ) TYPE="binary_vms" ;;"
     echo " i ) TYPE="idev_vms" ;;"
 
-	# echo "Usage: $0 [-s <45|90>] [-p <string>]" 1>&2;
-	# echo "Usage:"
-	# echo "    pip -h                      Display this help message."
-	# echo "    pip install                 Install a Python package."
 	exit 1;
 }
 
@@ -43,10 +39,6 @@ while getopts ':h:f:a:s:b:i:' opt; do
     i ) TYPE="idev_vms" ;;
     \? )
       echo "Invalid Option: -$OPTARG" 1>&2
-      exit 1
-      ;;
-    : )
-      echo "Invalid Option: -$OPTARG requires an argument" 1>&2
       exit 1
       ;;
     * )
