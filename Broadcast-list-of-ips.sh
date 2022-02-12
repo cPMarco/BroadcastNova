@@ -7,50 +7,59 @@
 
 # If I'm gona redo all that prunning again, here's the start
 # nova list --fields 'name','created','status','networks','metadata'
-FILE="$HOME/t1"
-echo "Using input file: $FILE"
+FILE="${HOME}/.config/broadcastnova/input-servers.txt"
+TEMP_FILE="/tmp/BroadcastNova-IPs.txt"
 USERNAME='root'
 
 usage() {
-	echo "Usage: provide one of the following options" 1>&2;
-    echo " h )"
-    echo "   usage"
-    echo "   ;;"
-    echo " f ) FILE="${OPTARG}" ;;"
-    echo " a ) TYPE="all_vms" ;;"
-    echo " s ) TYPE="sandbox_vms" ;;"
-    echo " b ) TYPE="binary_vms" ;;"
-    echo " i ) TYPE="idev_vms" ;;"
+    echo
+    echo "Usage: $(basename $0) [-h|-a|-s|-b|-i|-v] ( [-f <filepath>] )"
+    echo
+    echo "-h This help"
+    echo
+    echo "-a SSH into all VM's"
+    echo "-s SSH into only sandbox VM's"
+    echo "-b SSH into only binary VM's"
+    echo "-i SSH into only idev VM's"
+    echo
+    echo "-v Cause $(basename $0) to be verbose"
+    echo "-f Use custom file for input.  Default is ${FILE}."
+    echo
 
 	exit 1;
 }
 
+print_if_verbose() {
+    if [ ${VERBOSE} ]; then
+        echo "$1"
+    fi
+}
 
-# Check Parameters...
-while getopts ':h:f:a:s:b:i:' opt; do
-  case "${opt}" in
-    h )
-      usage
-      ;;
+# Get the options
+while getopts ":f:hasbiv" option; do
+  case ${option} in
+    h ) usage ;;
+    v ) VERBOSE='true' ;;
     f ) FILE="${OPTARG}" ;;
-    a ) TYPE="all_vms" ;;
-    s ) TYPE="sandbox_vms" ;;
-    b ) TYPE="binary_vms" ;;
-    i ) TYPE="idev_vms" ;;
+    a ) TYPE='all_vms' ;;
+    s ) TYPE='sandbox_vms' ;;
+    b ) TYPE='binary_vms' ;;
+    i ) TYPE='idev_vms' ;;
     \? )
       echo "Invalid Option: -$OPTARG" 1>&2
-      exit 1
-      ;;
-    * )
-      usage
       exit 1
       ;;
   esac
 done
 shift $((OPTIND -1))
 
+print_if_verbose "FILE: [$FILE]"
+print_if_verbose "TYPE: [$TYPE]"
+
 # Check for Default Arguments (Instance Name)
-if [ -z "${FILE}" ]; then
+if [[ -z "${FILE}" ]] || [[ ! -r "${FILE}" ]]; then
+    echo -e "\n[error] FILE not found: $FILE"
+    echo "[error] Ensure the directory and file exist."
     usage
 fi
 
@@ -62,26 +71,35 @@ if [ $length_input_file -ne $lines_with_ips ]; then
 fi
 
 if [ "$TYPE" == "all_vms" ]; then
-    \egrep -iv "store|manage|verify|tickets" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
+    \egrep -iv "store|manage|verify|tickets" $FILE | \awk '{print $10}' > $TEMP_FILE
 elif [ "$TYPE" == "sandbox_vms" ]; then
-    \egrep -i "sand|sb-" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
+    \egrep -i "sand|sb-" $FILE | \awk '{print $10}' > $TEMP_FILE
 elif [ "$TYPE" == "binary_vms" ]; then
-    \egrep -iv "sand|sb-|_sb_|store|manage|verify|tickets" $FILE | \awk '{print $10}' > ~/tmp-ips.txt
+    \egrep -iv "sand|sb-|_sb_|store|manage|verify|tickets" $FILE | \awk '{print $10}' > $TEMP_FILE
+elif [ "$TYPE" == "idev_vms" ]; then
+    \egrep -i "store|manage|verify|tickets" $FILE | \awk '{print $10}' > $TEMP_FILE
 fi
 
 if [ -z "$TYPE" ]; then
+    echo -e "\n[error] TYPE not found: $TYPE\n"
     usage
 fi
 
 # Get IP's from a file
-declare -a HOSTS=( $( cat ~/tmp-ips.txt ) );
-echo "Host IP's found: ${HOSTS[@]}"
+declare -a HOSTS=( $( cat $TEMP_FILE ) );
+echo -e "\nHost IP's found: ${HOSTS[@]}\n"
 
-
-COUNT=${#HOSTS[@]}
-
+# Check with user to ensure not connecting to wrong servers
+echo "Proceed? Type 'y' for yes"
+echo -n "[no] "
+read proceed_ans
+if [[ ! "$proceed_ans" =~ "y" ]]; then
+    print_if_verbose "Exiting..."
+    exit
+fi
 
 # Check if Instances Exist
+COUNT=${#HOSTS[@]}
 if [ "$COUNT" = "" ] || [ $COUNT == 0 ]; then
 	echo "IP(s) Not Found!"
 	exit 1
