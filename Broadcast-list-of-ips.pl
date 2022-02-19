@@ -4,6 +4,7 @@ use warnings;
 
 use Getopt::Long;
 use File::Basename;
+use FindBin qw($Bin);
 
 #<<<
 Getopt::Long::GetOptions(
@@ -107,12 +108,11 @@ if ( $count =~ /^0?$/ ) {
     print "IP(s) Not Found!";
     exit(0);
 }
-print STDERR "(debug) count: [$count]\n";
 
 # Determine Row / Column Layout;
 my $rows;
 if ( $count > 3 ) {
-    my $rows = sprintf "%.0f", sqrt($count);
+    $rows = sprintf "%.0f", sqrt($count);
 }
 else {
     $rows = $count;
@@ -121,8 +121,8 @@ else {
 my $ips = join( ' ', @ips );
 
 print "\nRunning:\n";
-print "scripts/osascript.sh -o $ips -r $rows -u $USERNAME\n\n";
-`scripts/osascript.sh -o "$ips" -r $rows -u $USERNAME`;
+print "$Bin/scripts/osascript.sh -o $ips -r $rows -u $USERNAME\n\n";
+`$Bin/scripts/osascript.sh -o "$ips" -r $rows -u $USERNAME`;
 
 # Subroutines
 sub get_lines {
@@ -155,7 +155,7 @@ sub get_ips {
     my (%args) = @_;
 
     my $include = ( defined $args{'include'} ) ? qr/$args{'include'}/ : qr/.*/;
-    my $exclude = ( defined $args{'exclude'} ) ? qr/$args{'exclude'}/ : qr/.*/;
+    my $exclude = ( defined $args{'exclude'} ) ? qr/$args{'exclude'}/ : qr/^$/;
 
     return map { s/.+?((\d{1,3}\.){3}\d{1,3}).*/$1/r }
       grep     { /$include/ }
