@@ -14,6 +14,7 @@ Getopt::Long::GetOptions(
     'sandbox_vms|s',
     'binary_vms|b',
     'idev_vms|i',
+    'show|w',
     'verbose|v',
     'help|h',
     'man',
@@ -30,13 +31,14 @@ my $SCRIPT_NAME = File::Basename::basename($0);
 sub usage() {
     (
         my $help_txt = qq{
-        Usage:\n  $SCRIPT_NAME [-h|-a|-s|-b|-i|-v] ( [-f <filepath>] )
+        Usage:\n  $SCRIPT_NAME [-h|-a|-s|-b|-i|-w|-v] ( [-f <filepath>] )
 
         Optional Options:
         -h This help
         -v Cause $SCRIPT_NAME to be verbose
         -f Use custom file for input.  Default is:
             ${FILE}
+        -w Show contents of input file
 
         Required Options (only one):
         -a SSH into all VM's
@@ -71,6 +73,11 @@ unless ( -r $FILE ) {
 
 my @lines = get_lines($FILE);
 validate_num_lines(@lines);
+
+if ( defined $opt{'show'} ) {
+    print "$_\n" for @lines;
+    exit(0);
+}
 
 my @ips;
 if ( $opt{'all_vms'} ) {
