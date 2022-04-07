@@ -53,7 +53,7 @@ sub usage() {
     exit(1);
 }
 
-Pod::Usage::pod2usage( -exitval => 0, -verbose => 2, noperldoc => 1 ) if ( $opt{'man'} );
+# Pod::Usage::pod2usage( -exitval => 0, -verbose => 2, noperldoc => 1 ) if ( $opt{'man'} );
 usage()                                                               if ( $opt{'help'} );
 
 sub print_out {
@@ -66,7 +66,7 @@ print_out "\nFILE: [$FILE]";
 
 # Check for Default Arguments (Instance Name);
 unless ( -r $FILE ) {
-    print -e "\n[error] FILE not found: $FILE";
+    print "\n[error] FILE not found: $FILE";
     print "[error] Ensure the directory and file exist.";
     usage();
 }
@@ -93,7 +93,7 @@ elsif ( $opt{'idev_vms'} ) {
     @ips = get_ips( lines => \@lines, include => 'store|manage|verify|tickets' );
 }
 else {
-    print -e "\n[error] type of VM is required but was not found.\n";
+    print "\n[error] type of VM is required but was not found.\n";
     usage();
 }
 
@@ -147,7 +147,7 @@ sub validate_num_lines {
     my $lines_with_ips    = scalar( get_lines_with_ips(@lines) );
 
     if ( $length_input_file != $lines_with_ips ) {
-        print -e "\n[error] Input file needs to be a list full of only servers with IP addresses. Each line is checked.\n";
+        print "\n[error] Input file needs to be a list full of only servers with IP addresses. Each line is checked.\n";
         usage();
     }
 }
