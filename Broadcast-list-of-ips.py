@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-import sys
 import os
+import pathlib
+import sys
 import getopt
 import re
 import fnmatch
+import subprocess
 
 # Constants
 FILE = os.environ.get('HOME') + '/.config/broadcastnova/input-servers.txt'
 TEMP_FILE = "/tmp/BroadcastNova-IPs.txt"
 USERNAME = 'root'
-SCRIPT_NAME = os.path.basename(__file__)
+SCRIPT_NAME = pathlib.Path(__file__).parent.resolve()
 
 # Command line options
 opt = {
@@ -171,8 +173,8 @@ rows = int(count ** 0.5) if count > 3 else count
 
 ips_str = ' '.join(ips)
 
-print("\nRunning:")
-print("{} -o {} -r {} -u {}\n".format(os.path.join(SCRIPT_NAME, 'scripts/osascript.sh'), ips_str, rows, USERNAME))
-os.system("{} -o {} -r {} -u {}".format(os.path.join(SCRIPT_NAME, 'scripts/osascript.sh'), ips_str, rows, USERNAME))
+command = [os.path.join(SCRIPT_NAME, 'scripts/osascript.sh'), '-o', ips_str, '-r', str(rows), '-u', USERNAME]
+print("\nRunning:\n", " ".join(command))
+subprocess.run(command)
 
 sys.exit(1)
