@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import os
+import getopt
 import re
+import fnmatch
 
 # Constants
 FILE = os.environ.get('HOME') + '/.config/broadcastnova/input-servers.txt'
@@ -19,13 +21,14 @@ opt = {
     'show': False,
     'verbose': False,
     'help': False,
-    'man': False
+    'man': False,
+    'glob_filter': None
 }
 
 def usage():
     help_txt = '''
     Usage:
-      {script} [-h|-a|-s|-b|-i|-w|-v] ( [-f <filepath>] )
+      {script} [-h|-a|-s|-b|-i|-w|-v|-g <glob_pattern>] ( [-f <filepath>] )
 
     Optional Options:
     -h    This help
@@ -33,6 +36,7 @@ def usage():
     -f    Use custom file for input. Default is:
               {file}
     -w    Show contents of input file
+    -g    Filter the input file using a glob pattern (default) or a full regular expression
 
     Required Options (only one):
     -a    SSH into all VM's
@@ -48,6 +52,34 @@ def print_out(text):
     if opt['verbose']:
         print(text)
 
+# Get command line options
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'hvasbiwvg:f:', ['help', 'man'])
+except getopt.GetoptError:
+    usage()
+
+for opt_name, opt_value in opts:
+    if opt_name in ('-h', '--help'):
+        opt['help'] = True
+    elif opt_name == '-v':
+        opt['verbose'] = True
+    elif opt_name == '-a':
+        opt['all_vms'] = True
+    elif opt_name == '-s':
+        opt['sandbox_vms'] = True
+    elif opt_name == '-b':
+        opt['binary_vms'] = True
+    elif opt_name == '-i':
+        opt['idev_vms'] = True
+    elif opt_name == '-w':
+        opt['show'] = True
+    elif opt_name == '-g':
+        opt['glob_filter'] = opt_value
+    elif opt_name == '-f':
+        opt['input_file'] = opt_value
+    elif opt_name == '--man':
+        opt['man'] = True
+
 # Main
 print_out("\nFILE: [{}]".format(FILE))
 
@@ -60,16 +92,15 @@ if not os.path.isfile(FILE):
 with open(FILE, 'r') as fh:
     lines = fh.read().splitlines()
 
-if opt['show']:
-    print('\n'.join(lines))
-    sys.exit(0)
-
 def validate_num_lines(lines):
     lines_with_ips = get_lines_with_ips(lines)
     length_input_file = len(lines)
     if length_input_file != len(lines_with_ips):
         print("\n[error] Input file needs to be a list full of only servers with IP addresses. Each line is checked.\n")
         usage()
+
+def get_lines_with_filter(lines):
+    return fnmatch.filter(lines, opt['glob_filter'])
 
 def get_lines_with_ips(lines):
     return [line for line in lines if re.search(r'\d{1,3}(?:\.\d{1,3}){3}', line)]
@@ -91,9 +122,18 @@ def get_ips_binary(lines):
 def get_ips_idev(lines):
     return get_ips(lines, include='store|manage|verify|tickets')
 
+if opt['show']:
+    if opt['glob_filter']:
+        lines = get_lines_with_filter(lines)
+    print('\n'.join(lines))
+    sys.exit(0)
+
 validate_num_lines(lines)
 
 if opt['all_vms']:
+    ips = get_ips_all(lines)
+elif opt['glob_filter']:
+    lines = get_lines_with_filter(lines)
     ips = get_ips_all(lines)
 elif opt['sandbox_vms']:
     ips = get_ips_sandbox(lines)
@@ -104,6 +144,10 @@ elif opt['idev_vms']:
 else:
     print("\n[error] type of VM is required but was not found.\n")
     usage()
+
+if opt['glob_filter']:
+    lines = fnmatch.filter(lines, opt['glob_filter'])
+    ips = get_ips(lines)
 
 print("\nHost IP's found:")
 print('\n'.join(ips))
