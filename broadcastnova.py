@@ -1,7 +1,31 @@
+import sys
 import os
 import pathlib
 import re
 import fnmatch
+
+FILE = os.environ.get('HOME') + '/.config/broadcastnova/input-servers.txt'
+
+def usage():
+    help_txt = '''
+    Usage:
+      {script} [-h|-a|-s|-b|-i|-w|-v|-g <glob_pattern>] ( [-f <filepath>] )
+
+    Optional Options:
+    -h    This help
+    -v    Verbose
+    -f    Use custom file for input. Default is:
+              {file}
+    -w    Show contents of input file, can be combined with -g
+
+    Required Options (only one):
+    -a    SSH into all VM's
+    -g    SSH into any VM's matching a provided glob, like *search_term*
+    # These also satisfy the requirement, but are tailored for my own workflow
+      -s    SSH into only sandbox VM's
+      -b    SSH into only binary VM's
+      -i    SSH into only idev VM's
+    '''.format(script=sys.argv[0], file=FILE)
 
 
 def get_lines_with_filter(lines, glob_filter):
@@ -35,11 +59,22 @@ def get_ips_idev(lines):
 
 
 def validate_num_lines(lines):
+    if not lines:
+        print("\n[error] Input file is empty or does not contain valid lines.\n")
+        usage()
     lines_with_ips = get_lines_with_ips(lines)
     length_input_file = len(lines)
     if length_input_file != len(lines_with_ips):
         print("\n[error] Input file needs to be a list full of only servers with IP addresses. Each line is checked.\n")
         usage()
+
+# debugm
+# def validate_num_lines(lines):
+#     lines_with_ips = get_lines_with_ips(lines)
+#     length_input_file = len(lines)
+#     if length_input_file != len(lines_with_ips):
+#         print("\n[error] Input file needs to be a list full of only servers with IP addresses. Each line is checked.\n")
+#         usage()
 
 
 def process_input_file(file):
