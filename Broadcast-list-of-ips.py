@@ -34,17 +34,18 @@ def usage():
 
     Optional Options:
     -h    This help
-    -v    Cause {script} to be verbose
+    -v    Verbose
     -f    Use custom file for input. Default is:
               {file}
-    -w    Show contents of input file
-    -g    Filter the input file using a glob pattern (default) or a full regular expression
+    -w    Show contents of input file, can be combined with -g
 
     Required Options (only one):
     -a    SSH into all VM's
-    -s    SSH into only sandbox VM's
-    -b    SSH into only binary VM's
-    -i    SSH into only idev VM's
+    -g    SSH into any VM's matching a provided glob, like *search_term*
+    # These also satify the requirement, but are tailored for my own workflow
+      -s    SSH into only sandbox VM's
+      -b    SSH into only binary VM's
+      -i    SSH into only idev VM's
     '''.format(script=SCRIPT_NAME, file=FILE)
 
     print(help_txt)
