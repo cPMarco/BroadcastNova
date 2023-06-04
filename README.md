@@ -4,9 +4,9 @@ Using iTerm2, paste results from 'nova list' into a temp file, then connect to a
 
 ### Usage
 
-$ Broadcast-list-of-ips.py -h
+$ Broadcast-Launch.py -h
 
-    Broadcast-list-of-ips.py [-h|-a|-s|-b|-i|-w|-v|-g <glob_pattern>] ( [-f <filepath>] )
+    Broadcast-Launch.py [-h|-a|-s|-b|-i|-w|-v|-g <glob_pattern>] ( [-f <filepath>] )
 
     Optional Options:
     -h    This help
@@ -26,7 +26,7 @@ $ Broadcast-list-of-ips.py -h
 
 I use these aliases on my Mac (~/.bash_profile or ~/.zshrc):
 
-    alias broadcast="${HOME}/git/BroadcastNova/Broadcast-list-of-ips.py"
+    alias broadcast="${HOME}/git/BroadcastNova/Broadcast-Launch.py"
     broadcastpaste() {
         pbpaste > "${HOME}/.config/broadcastnova/input-servers.txt"
     }
