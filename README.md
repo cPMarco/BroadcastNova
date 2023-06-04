@@ -1,5 +1,7 @@
 # BroadcastNova
 
+Paste results from 'nova list' into a temp file, then connect to all your VM's at once.
+
 # Credit
 # https://github.com/ramannanda/Broadcast
 # https://github.com/bikboy/Tim/wiki/AWS-CLI----ITerm2-automation-(Mac)
