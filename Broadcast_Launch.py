@@ -178,4 +178,10 @@ command = [os.path.join(SCRIPT_NAME, 'scripts/osascript.sh'), '-o', ips_str, '-r
 print("\nRunning:\n", " ".join(command))
 subprocess.run(command)
 
+if __name__ == "__main__":
+    pass
+
 sys.exit(1)
+
+if __name__ == "__main__":
+    pass
